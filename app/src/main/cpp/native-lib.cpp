@@ -4,7 +4,7 @@
 #include <streambuf>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/types_c.h>
-#include <android/Log.h>
+#include <android/log.h>
 using namespace cv;
 using namespace std;
 
