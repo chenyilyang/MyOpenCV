@@ -13,4 +13,5 @@
     <string name="menu_slideshow">腐蚀</string>
     <string name="menu_camshift">彩色目标跟踪</string>
     <string name="menu_mat">MAT</string>
+    <string name="menu_contrast">Contrast</string>
 </resources>
