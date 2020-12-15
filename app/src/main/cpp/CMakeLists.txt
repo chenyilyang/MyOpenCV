@@ -10,16 +10,28 @@ set(OpenCV_DIR ${MAIN_SOURCE_DIR}/../../../OpenCV-android-sdk/sdk/native/jni)
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
+include_directories(
+        ${MAIN_SOURCE_DIR}/cpp/include
+)
+file(GLOB src-files
+        ${MAIN_SOURCE_DIR}/cpp/native_opengl/*.cpp
+        ${MAIN_SOURCE_DIR}/cpp/native_openg/render/*.cpp
+        ${MAIN_SOURCE_DIR}/cpp/native_openg/util/*.cpp)
 
 #add_library(opencv_jni_shared STATIC dummy.cpp)
 add_library( # Sets the name of the library.
              native-lib
-
              # Sets the library as a shared library.
              SHARED
-
              # Provides a relative path to your source file(s).
-             native-lib.cpp )
+             native-lib.cpp)
+add_library( # Sets the name of the library.
+             native-opengl
+             # Sets the library as a shared library.
+             SHARED
+             # Provides a relative path to your source file(s).
+             native-render.cpp
+             ${src-files})
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -46,4 +58,10 @@ target_link_libraries( # Specifies the target library.
                        ${OpenCV_LIBRARIES}
                        # Links the target library to the log library
                        # included in the NDK.
-                       ${log-lib} )
+                       ${log-lib})
+target_link_libraries( # Specifies the target library.
+                       native-opengl
+                       # Links the target library to the log library
+                       # included in the NDK.
+                       EGL
+                       GLESv3)
