@@ -14,4 +14,9 @@
     <string name="menu_camshift">彩色目标跟踪</string>
     <string name="menu_mat">MAT</string>
     <string name="menu_contrast">Contrast</string>
+
+
+    <string name="menu_opengl_fbo">FBO</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

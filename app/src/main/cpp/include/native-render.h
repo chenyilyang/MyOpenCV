@@ -4,6 +4,7 @@
 #ifndef MYNATIAVEAPPLICATION_NATIVE_RENDER_H
 #define MYNATIAVEAPPLICATION_NATIVE_RENDER_H
 #include <jni.h>
+#include "LogUtil.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -28,5 +28,9 @@
             android:id="@+id/nav_contrast"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_contrast" />
+        <item
+            android:id="@+id/nav_opengl_fbo"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_opengl_fbo" />
     </group>
 </menu>

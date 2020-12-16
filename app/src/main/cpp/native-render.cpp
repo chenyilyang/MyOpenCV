@@ -9,12 +9,12 @@ extern "C" {
     JNIEXPORT void JNICALL
     Java_com_huahuico_mynatiaveapplication_NativeRender_native_1init(JNIEnv *env,
                                                                                     jobject thiz) {
-        // TODO: implement native_init()
+        LOGCATD("native opengl init");
     }
     JNIEXPORT void JNICALL
     Java_com_huahuico_mynatiaveapplication_NativeRender_native_1uninit(JNIEnv *env,
                                                                                       jobject thiz) {
-        // TODO: implement native_uninit()
+        LOGCATD("native opengl uninit");
     }
     JNIEXPORT void JNICALL
     Java_com_huahuico_mynatiaveapplication_NativeRender_native_1SetParamsInt(JNIEnv *env,
@@ -22,7 +22,7 @@ extern "C" {
                                                                                             jint param_type,
                                                                                             jint value0,
                                                                                             jint value1) {
-        // TODO: implement native_SetParamsInt()
+        LOGCATD("native opengl setParamInt param_type = %d, value0 = %d, value1 = %d", param_type, value0, value1);
     }
     JNIEXPORT void JNICALL
     Java_com_huahuico_mynatiaveapplication_NativeRender_native_1OnDrawFrame(JNIEnv *env,

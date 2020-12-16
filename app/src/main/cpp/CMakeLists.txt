@@ -12,6 +12,7 @@ set(OpenCV_DIR ${MAIN_SOURCE_DIR}/../../../OpenCV-android-sdk/sdk/native/jni)
 # Gradle automatically packages shared libraries with your APK.
 include_directories(
         ${MAIN_SOURCE_DIR}/cpp/include
+        ${MAIN_SOURCE_DIR}/cpp/glm
 )
 file(GLOB src-files
         ${MAIN_SOURCE_DIR}/cpp/native_opengl/*.cpp
@@ -63,5 +64,6 @@ target_link_libraries( # Specifies the target library.
                        native-opengl
                        # Links the target library to the log library
                        # included in the NDK.
+                       ${log-lib}
                        EGL
                        GLESv3)

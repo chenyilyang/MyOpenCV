@@ -37,4 +37,9 @@
         android:name="com.huahuico.mynatiaveapplication.ui.contrast.ContrastFragment"
         android:label="@string/menu_contrast"
         tools:layout="@layout/fragment_src_dst" />
+    <fragment
+        android:id="@+id/nav_opengl_fbo"
+        android:name="com.huahuico.mynatiaveapplication.opengl.ui.FBOFragment"
+        android:label="@string/menu_opengl_fbo"
+        tools:layout="@layout/fragment_f_b_o" />
 </navigation>
