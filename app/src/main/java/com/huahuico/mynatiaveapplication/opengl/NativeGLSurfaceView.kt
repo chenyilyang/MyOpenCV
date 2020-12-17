@@ -68,15 +68,15 @@ class NativeGLSurfaceView : GLSurfaceView, ScaleGestureDetector.OnScaleGestureLi
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        val widht = MeasureSpec.getSize(widthMeasureSpec)
-        val height = MeasureSpec.getSize(heightMeasureSpec)
+        val measureW = MeasureSpec.getSize(widthMeasureSpec)
+        val measureH = MeasureSpec.getSize(heightMeasureSpec)
         if (0 == ratioWidth || 0 == ratioHeight) {
-            setMeasuredDimension(width, height)
+            setMeasuredDimension(measureW, measureH)
         } else {
-            if (width < height * ratioWidth / ratioHeight) {
-                setMeasuredDimension(width, width * ratioHeight / ratioWidth)
+            if (measureW < measureH * ratioWidth / ratioHeight) {
+                setMeasuredDimension(measureW, measureW * ratioHeight / ratioWidth)
             } else {
-                setMeasuredDimension(height * ratioWidth / ratioHeight, height)
+                setMeasuredDimension(measureH * ratioWidth / ratioHeight, measureH)
             }
         }
     }

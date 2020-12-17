@@ -16,7 +16,7 @@ import com.huahuico.mynatiaveapplication.opengl.SampleSahderType
 import kotlinx.android.synthetic.main.fragment_image.*
 import java.nio.ByteBuffer
 
-class FBOFragment : BaseFragment() {
+class TextureMapFragment : BaseFragment() {
     lateinit var nativeGLSurfaceView : NativeGLSurfaceView
     lateinit var glRender : NativeGLRender
     override fun onCreateView(
@@ -45,7 +45,7 @@ class FBOFragment : BaseFragment() {
         if (rootView.width != nativeGLSurfaceView.width || rootView.height != nativeGLSurfaceView.height) {
             nativeGLSurfaceView.setAspectRatio(rootView.width, rootView.height)
         }
-        glRender.setParamInt(SampleSahderType.SAMPLE_SHADER_TYPE_NORMAL, SampleSahderType.SAMPLE_SHADER_TYPE_FBO, 0)
+        glRender.setParamInt(SampleSahderType.SAMPLE_SHADER_TYPE_NORMAL, SampleSahderType.SAMPLE_SHADER_TYPE_TEXTUREMAP, 0)
     }
 
     override fun onDestroy() {

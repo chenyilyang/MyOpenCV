@@ -12,12 +12,12 @@ set(OpenCV_DIR ${MAIN_SOURCE_DIR}/../../../OpenCV-android-sdk/sdk/native/jni)
 # Gradle automatically packages shared libraries with your APK.
 include_directories(
         ${MAIN_SOURCE_DIR}/cpp/include
+        ${MAIN_SOURCE_DIR}/cpp/sample_h
         ${MAIN_SOURCE_DIR}/cpp/glm
 )
 file(GLOB src-files
         ${MAIN_SOURCE_DIR}/cpp/native_opengl/*.cpp
-        ${MAIN_SOURCE_DIR}/cpp/native_openg/render/*.cpp
-        ${MAIN_SOURCE_DIR}/cpp/native_openg/util/*.cpp)
+        ${MAIN_SOURCE_DIR}/cpp/sample_cpp/*.cpp)
 
 #add_library(opencv_jni_shared STATIC dummy.cpp)
 add_library( # Sets the name of the library.

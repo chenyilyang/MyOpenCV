@@ -5,6 +5,8 @@
 #define MYNATIAVEAPPLICATION_NATIVE_RENDER_H
 #include <jni.h>
 #include "LogUtil.h"
+#include "EGLRender.h"
+#include "GLRenderContext.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

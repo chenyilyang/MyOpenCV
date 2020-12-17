@@ -5,7 +5,7 @@
 #include "../include/EGLRender.h"
 #include "../include/LogUtil.h"
 #include "../include/GLUtils.h"
-#include "../include/SampleType.h"
+#include "../include/SampleBase.h"
 
 #define VERTEX_POS_LOC 0
 #define TEXTURE_POS_LOC 1
@@ -86,8 +86,8 @@ void EGLRender::Init() {
     }
     if (!m_IsGLContextReady) return;
     //todo add sample fragment shader source here with index
-    m_fShaderStrs[SHADER_TYPE_NORMAL] = fShaderStr0;
-    m_fShaderStrs[SHADER_TYPE_FBO] = fShaderStr0;
+    m_fShaderStrs[SAMPLE_SHADER_TYPE_NORMAL] = fShaderStr0;
+    m_fShaderStrs[SAMPLE_SHADER_TYPE_FBO] = fShaderStr0;
 
     glGenTextures(1, &m_ImageTextureId);
     glBindTexture(GL_TEXTURE_2D, m_ImageTextureId);
@@ -278,7 +278,7 @@ void EGLRender::SetImageData(uint8_t *pData, int width, int height) {
 void EGLRender::SetIntParams(int paramType, int param) {
     LOGCATD("EGLRender::SetIntParams paramType = %d, param = %d", paramType, param);
     switch(paramType) {
-        case SHADER_TYPE_NORMAL:{
+        case SAMPLE_SHADER_TYPE_NORMAL:{
             if (param > 0) {
                 m_ShaderIndex = param;
                 if (m_ProgramObj) {

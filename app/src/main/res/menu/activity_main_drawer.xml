@@ -29,6 +29,10 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_contrast" />
         <item
+            android:id="@+id/nav_texture_map"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_texture_map" />
+        <item
             android:id="@+id/nav_opengl_fbo"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_opengl_fbo" />

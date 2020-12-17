@@ -38,8 +38,13 @@
         android:label="@string/menu_contrast"
         tools:layout="@layout/fragment_src_dst" />
     <fragment
+        android:id="@+id/nav_texture_map"
+        android:name="com.huahuico.mynatiaveapplication.opengl.ui.TextureMapFragment"
+        android:label="@string/menu_texture_map"
+        tools:layout="@layout/fragment_image" />
+    <fragment
         android:id="@+id/nav_opengl_fbo"
         android:name="com.huahuico.mynatiaveapplication.opengl.ui.FBOFragment"
         android:label="@string/menu_opengl_fbo"
-        tools:layout="@layout/fragment_f_b_o" />
+        tools:layout="@layout/fragment_image" />
 </navigation>
