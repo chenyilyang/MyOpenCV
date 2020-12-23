@@ -55,13 +55,13 @@ find_package(OpenCV REQUIRED)
 # find_package(OpenCV REQUIRED core imgproc)
 target_link_libraries( # Specifies the target library.
                        native-lib
-
+                       -ljnigraphics
                        ${OpenCV_LIBRARIES}
                        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib}
                        EGL
-                       GLESv2)
+                       GLESv3)
 target_link_libraries( # Specifies the target library.
                        native-opengl
                        # Links the target library to the log library

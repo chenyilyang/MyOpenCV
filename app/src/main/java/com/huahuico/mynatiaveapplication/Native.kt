@@ -13,6 +13,7 @@ class Native {
         }
         public external fun offscreenRendering(width: Int, height: Int) : IntArray?
         public external fun releaseOffscreen()
+        public external fun openglOffscreen(bitmap : Bitmap) : Int
         private external fun convertToGray(bitmap: IntArray?, width: Int, height: Int) : IntArray?
         private external fun convertToErode(bitmap: IntArray?, width: Int, height: Int) : IntArray?
         private external fun convertToBlur(bitmap: IntArray?, width: Int, height: Int) : IntArray?

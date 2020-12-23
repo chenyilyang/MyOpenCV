@@ -5,14 +5,15 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/types_c.h>
 #include <android/log.h>
-
+#include <android/bitmap.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <GLES2/gl2ext.h>
 
 using namespace cv;
 using namespace std;
+#define GO_CHECK_GL_ERROR() cout << "CHECK_GL_ERROR " <<  __FUNCTION__ << "glGetError = " << glGetError() << ", line = " <<  __LINE__ << endl
 
 class MyStreamBuf : public std::streambuf {
     enum {
@@ -391,6 +392,8 @@ static EGLConfig eglConf;
 static EGLSurface eglSurface;
 static EGLContext eglCtx;
 static EGLDisplay eglDisplay;
+static GLuint m_TextureId;
+static GLint m_ProgramObj;
 extern "C"
 JNIEXPORT jintArray JNICALL
 Java_com_huahuico_mynatiaveapplication_Native_00024Companion_offscreenRendering(JNIEnv *env,
@@ -513,6 +516,8 @@ Java_com_huahuico_mynatiaveapplication_Native_00024Companion_offscreenRendering(
 JNIEXPORT void JNICALL
 Java_com_huahuico_mynatiaveapplication_Native_00024Companion_releaseOffscreen(JNIEnv *env,
                                                                               jobject thiz) {
+    glDeleteProgram(m_ProgramObj);
+    glDeleteTextures(1, &m_TextureId);
     eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(eglDisplay, eglCtx);
     eglDestroySurface(eglDisplay, eglSurface);
@@ -520,4 +525,278 @@ Java_com_huahuico_mynatiaveapplication_Native_00024Companion_releaseOffscreen(JN
     eglDisplay = EGL_NO_DISPLAY;
     eglSurface = EGL_NO_SURFACE;
     eglCtx = EGL_NO_CONTEXT;
+}
+
+void initEGLEnv(int width, int height) {
+    const EGLint confAttr[] = {
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,//very important!
+            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+            EGL_RED_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_BLUE_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,//if you need the alpha channel
+            EGL_DEPTH_SIZE, 8,//if you need the depth buffer
+            EGL_STENCIL_SIZE, 8,
+            EGL_NONE
+    };
+    const EGLint ctxAttr[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,//very important!
+            EGL_NONE
+    };
+    const EGLint surfaceAttr[] = {
+            EGL_WIDTH, (EGLint)width,
+            EGL_HEIGHT, (EGLint)height,
+            EGL_NONE
+    };
+    EGLint eglMajVers, eglMinVers;
+    EGLint numConfigs;
+    eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (eglDisplay == EGL_NO_DISPLAY) {
+        cout << "Unable to open connection to local windowing system" << endl;
+    }
+    if (!eglInitialize(eglDisplay, &eglMajVers, &eglMinVers)) {
+        cout << "Unable to initialize EGL, Handle and recover" << endl;
+    }
+    cout << "EGL init with version " << eglMajVers << "." << eglMinVers << endl;
+    if (!eglChooseConfig(eglDisplay, confAttr, &eglConf, 1, &numConfigs)) {
+        cout << "Some configs are wrong" << endl;
+    }
+    eglSurface = eglCreatePbufferSurface(eglDisplay, eglConf, surfaceAttr);
+    if (eglSurface == EGL_NO_SURFACE) {
+        switch (eglGetError()) {
+            case EGL_BAD_ALLOC:
+                cout << "Not enough resources available" << endl;
+                break;
+            case EGL_BAD_CONFIG:
+                cout << "provided EGLConfig is invalid" << endl;
+                break;
+            case EGL_BAD_PARAMETER:
+                cout << "Provided EGL_WIDTH, EGL_HEIGHT is invalid" << endl;
+                break;
+            case EGL_BAD_MATCH:
+                cout << "Check window and EGLConfig attributes" << endl;
+                break;
+        }
+    }
+    eglCtx = eglCreateContext(eglDisplay, eglConf, EGL_NO_CONTEXT, ctxAttr);
+    if (eglCtx == EGL_NO_CONTEXT) {
+        EGLint error = eglGetError();
+        if (error == EGL_BAD_CONFIG) {
+            cout << "EGL_BAD_CONFIG" << endl;
+        }
+    }
+    if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglCtx)) {
+        cout << "Make current failed" << endl;
+    }
+    // end of standard gl context setup
+}
+void checkGLError(const char *pGLOperation) {
+    for (GLint error = glGetError(); error; error = glGetError()) {
+        cout << "GLUtils::CheckGLError GL Operation " << pGLOperation << "() glError 0x" << error << endl;
+    }
+}
+GLuint loadShader(GLenum shaderType, const char *pSource) {
+    GLuint shader = 0;
+    shader = glCreateShader(shaderType);
+    if (shader) {
+        glShaderSource(shader, 1, &pSource, nullptr);
+        glCompileShader(shader);
+        GLint compiled = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+        if (!compiled) {
+            GLint infoLen = 0;
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+            if (infoLen) {
+                char * buf = (char *) malloc((size_t)infoLen);
+                if (buf) {
+                    glGetShaderInfoLog(shader, infoLen, nullptr, buf);
+                    cout << "GLUtils::LoadShader Could not compile shader" << shaderType << "\n  " << buf << endl;
+                    free(buf);
+                }
+                glDeleteShader(shader);
+                shader = 0;
+            }
+        }
+    }
+    return shader;
+}
+GLuint createProgram(const char *pVertexShaderSource, const char *pFragShaderSource, GLuint &vertexShaderHandle, GLuint &fragShaderHandle) {
+    GLuint program = 0;
+    vertexShaderHandle = loadShader(GL_VERTEX_SHADER, pVertexShaderSource);
+    if (!vertexShaderHandle) return program;
+    fragShaderHandle = loadShader(GL_FRAGMENT_SHADER, pFragShaderSource);
+    if (!fragShaderHandle) return program;
+    program = glCreateProgram();
+    if (program) {
+        glAttachShader(program, vertexShaderHandle);
+        checkGLError("glAttachVertexShader");
+        glAttachShader(program, fragShaderHandle);
+        checkGLError("glAttachFragmentShader");
+        glLinkProgram(program);
+        GLint linkStatus = GL_FALSE;
+        glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+        glDetachShader(program, vertexShaderHandle);
+        glDeleteShader(vertexShaderHandle);
+        vertexShaderHandle = 0;
+
+        glDetachShader(program, fragShaderHandle);
+        glDeleteShader(fragShaderHandle);
+        fragShaderHandle = 0;
+
+        if (linkStatus != GL_TRUE) {
+            GLint bufLength = 0;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
+            if (bufLength) {
+                char * buf = (char *) malloc((size_t)bufLength);
+                if (buf) {
+                    glGetProgramInfoLog(program, bufLength, nullptr, buf);
+                    cout << "GLUtils::CreateProgram Could not link program:" << buf << endl;
+                    free(buf);
+                }
+            }
+            glDeleteProgram(program);
+            program = 0;
+        }
+    }
+    cout << "GLUtils::CreateProgram program = " << program << endl;
+    return program;
+}
+void createRenderBuffer(int width, int height) {
+    GLuint fboId = 0;
+    GLuint renderBufferWidth = width;
+    GLuint renderBufferHeight = height;
+
+    // create a framebuffer object
+    glGenFramebuffers(1, &fboId);
+    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+    cout << glGetError() << endl;
+    GLuint renderBuffer;
+    glGenRenderbuffers(1, &renderBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+    cout << glGetError() << endl;
+    glRenderbufferStorage(GL_RENDERBUFFER,
+                          GL_RGB565,//only support RGBA565??
+                          renderBufferWidth,
+                          renderBufferHeight);
+    cout << glGetError() << endl;
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+                              GL_COLOR_ATTACHMENT0,
+                              GL_RENDERBUFFER,
+                              renderBuffer);
+    cout << glGetError() << endl;
+    GLuint depthRenderbuffer;
+    glGenRenderbuffers(1, &depthRenderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16,     renderBufferWidth, renderBufferHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+
+    // check FBO status
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if(status != GL_FRAMEBUFFER_COMPLETE) {
+        cout << "Problem with OpenGL framebuffer after specifying color render buffer: \n" << status << endl;
+    } else {
+        cout << "FBO creation success" << endl;
+    }
+}
+
+void createTextureBuffer(int width, int height, void * pixels) {
+    GLint m_SampleLoc;
+    GLuint m_VertexShader;
+    GLuint m_FragmentSahder;
+    glGenTextures(1, &m_TextureId);
+    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, GL_NONE);
+
+    char vShaderStr [] =
+            "#version 300 es                                    \n"
+            "layout(location = 0) in vec4 a_position;           \n"
+            "layout(location = 1) in vec2 a_texCoord;           \n"
+            "out vec2 v_texCoord;                               \n"
+            "void main() {                                      \n"
+            "   gl_Position = a_position;                       \n"
+            "   v_texCoord = a_texCoord;                        \n"
+            "}                                                  \n";
+    //normal fragment shader
+    char fShaderStr [] =
+            "#version 300 es                                    \n"
+            "precision mediump float;                           \n"
+            "in vec2 v_texCoord;                                \n"
+            "layout(location = 0) out vec4 outColor;            \n"
+            "uniform sampler2D s_TextureMap;                    \n"
+            "void main() {                                      \n"
+            "   outColor = texture(s_TextureMap, v_texCoord);   \n"
+            "}                                                  \n";
+    m_ProgramObj = createProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentSahder);
+    if (m_ProgramObj) {
+        m_SampleLoc = glGetUniformLocation(m_ProgramObj, "s_TextureMap");
+    } else {
+        cout << "TextureMapSampler::Init create program fail" << endl;
+    }
+
+    if (m_ProgramObj == GL_NONE || m_TextureId == GL_NONE) return;
+    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1.0, 0.0, 0.0, 1.0);
+    GLfloat verticesCoords[] = {
+            -1.0f, -1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            -1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f
+    };
+    GLfloat textureCoords[] = {
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            0.0f, 1.0f,
+            1.0f, 1.0f
+    };
+    GLushort indices [] = {0, 1, 2, 1, 3, 2};
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glBindTexture(GL_TEXTURE_2D, GL_NONE);
+    GO_CHECK_GL_ERROR();
+    glUseProgram(m_ProgramObj);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), verticesCoords);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), textureCoords);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    GO_CHECK_GL_ERROR();
+    //bind the rgba map
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+    glUniform1i(m_SampleLoc, 0);
+    GO_CHECK_GL_ERROR();
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
+    GO_CHECK_GL_ERROR();
+}
+extern "C" JNIEXPORT jint JNICALL
+Java_com_huahuico_mynatiaveapplication_Native_00024Companion_openglOffscreen(JNIEnv *env,
+                                                                             jobject thiz,
+                                                                             jobject bitmap) {
+    std::cout.rdbuf(&g_MyStreamBuf);
+    void * srcpixels = 0;
+    AndroidBitmapInfo info;
+    if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) return -1;
+    if (AndroidBitmap_lockPixels(env, bitmap, &srcpixels) < 0) return -1;
+
+    initEGLEnv(info.width, info.height);
+    createRenderBuffer(info.width, info.height);
+    createTextureBuffer(info.width, info.height, srcpixels);
+
+    // check the output format
+    // This is critical to knowing what surface format just got created
+    // ES only supports 5-6-5 and other limited formats and the driver
+    // might have picked another format
+    GLint format = 0, type = 0;
+    glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &format);
+    glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &type);
+    // commit the clear to the offscreen surface
+    eglSwapBuffers(eglDisplay, eglSurface);
+
+    AndroidBitmap_unlockPixels(env, bitmap);
+    return 0;
 }
