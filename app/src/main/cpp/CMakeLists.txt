@@ -59,7 +59,9 @@ target_link_libraries( # Specifies the target library.
                        ${OpenCV_LIBRARIES}
                        # Links the target library to the log library
                        # included in the NDK.
-                       ${log-lib})
+                       ${log-lib}
+                       EGL
+                       GLESv2)
 target_link_libraries( # Specifies the target library.
                        native-opengl
                        # Links the target library to the log library

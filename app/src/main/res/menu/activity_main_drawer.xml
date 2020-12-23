@@ -36,5 +36,9 @@
             android:id="@+id/nav_opengl_fbo"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_opengl_fbo" />
+        <item
+            android:id="@+id/nav_opengl_offscreen_rendering"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_opengl_offscreen_rendering" />
     </group>
 </menu>

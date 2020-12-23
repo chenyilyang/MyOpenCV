@@ -5,6 +5,12 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/types_c.h>
 #include <android/log.h>
+
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 using namespace cv;
 using namespace std;
 
@@ -379,4 +385,139 @@ Java_com_huahuico_mynatiaveapplication_Native_00024Companion_mat(JNIEnv *env, jo
     env->SetIntArrayRegion(result, 0, height * width, (const jint *)ptr);
     env->ReleaseIntArrayElements(bitmap, cbuf, 0);
     return result;
+}
+
+static EGLConfig eglConf;
+static EGLSurface eglSurface;
+static EGLContext eglCtx;
+static EGLDisplay eglDisplay;
+extern "C"
+JNIEXPORT jintArray JNICALL
+Java_com_huahuico_mynatiaveapplication_Native_00024Companion_offscreenRendering(JNIEnv *env,
+                                                                                jobject thiz,
+                                                                                jint width,
+                                                                                jint height) {
+    std::cout.rdbuf(&g_MyStreamBuf);
+    const char vertex_shader_fix[] =
+            "attribute vec4 a_Position;\n"
+            "void main() {\n"
+            "	gl_Position=a_Position;\n"
+            "}\n";
+
+    const char fragment_shader_simple[] =
+            "precision mediump float;\n"
+            "void main(){\n"
+            "	gl_FragColor = vec4(0.0,1.0,0.0,1.0);\n"
+            "}\n";
+
+    const float tableVerticesWithTriangles[] = {
+            // Triangle1
+            -0.5f, -0.5f,
+            0.5f, 0.5f,
+            -0.5f, 0.5f,
+            // Triangle2
+            -0.5f, -0.5f,
+            0.5f, -0.5f,
+            0.5f, 0.5f,
+    };
+    const EGLint confAttr[] = {
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,//very important!
+            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+            EGL_RED_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_BLUE_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,//if you need the alpha channel
+            EGL_DEPTH_SIZE, 8,//if you need the depth buffer
+            EGL_STENCIL_SIZE, 8,
+            EGL_NONE
+    };
+    const EGLint ctxAttr[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,//very important!
+            EGL_NONE
+    };
+    const EGLint surfaceAttr[] = {
+            EGL_WIDTH, 512,
+            EGL_WIDTH, 512,
+            EGL_NONE
+    };
+    EGLint eglMajVers, eglMinVers;
+    EGLint numConfigs;
+    eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (eglDisplay == EGL_NO_DISPLAY) {
+        cout << "Unable to open connection to local windowing system" << endl;
+    }
+    if (!eglInitialize(eglDisplay, &eglMajVers, &eglMinVers)) {
+        cout << "Unable to initialize EGL, Handle and recover" << endl;
+    }
+    cout << "EGL init with version " << eglMajVers << "." << eglMinVers << endl;
+    if (!eglChooseConfig(eglDisplay, confAttr, &eglConf, 1, &numConfigs)) {
+        cout << "Some configs are wrong" << endl;
+    }
+    eglSurface = eglCreatePbufferSurface(eglDisplay, eglConf, surfaceAttr);
+    if (eglSurface == EGL_NO_SURFACE) {
+        switch (eglGetError()) {
+            case EGL_BAD_ALLOC:
+                cout << "Not enough resources available" << endl;
+                break;
+            case EGL_BAD_CONFIG:
+                cout << "provided EGLConfig is invalid" << endl;
+                break;
+            case EGL_BAD_PARAMETER:
+                cout << "Provided EGL_WIDTH, EGL_HEIGHT is invalid" << endl;
+                break;
+            case EGL_BAD_MATCH:
+                cout << "Check window and EGLConfig attributes" << endl;
+                break;
+        }
+    }
+    eglCtx = eglCreateContext(eglDisplay, eglConf, EGL_NO_CONTEXT, ctxAttr);
+    if (eglCtx == EGL_NO_CONTEXT) {
+        EGLint error = eglGetError();
+        if (error == EGL_BAD_CONFIG) {
+            cout << "EGL_BAD_CONFIG" << endl;
+        }
+    }
+    if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglCtx)) {
+        cout << "Make current failed" << endl;
+    }
+
+    const char *vertex_shader = vertex_shader_fix;
+    const char *fragment_shader = fragment_shader_simple;
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glCullFace(GL_BACK);
+    glViewport(0,0, 512, 512);
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertex_shader, NULL);
+    glCompileShader(vertexShader);
+
+    GLuint fragmentShader =glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragment_shader, NULL);
+    glCompileShader(fragmentShader);
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+    glUseProgram(program);
+    GLuint aPositionLocation = glGetAttribLocation(program, "a_Position");
+    glVertexAttribPointer(aPositionLocation,2,GL_FLOAT, GL_FALSE, 0, tableVerticesWithTriangles);
+    glEnableVertexAttribArray(aPositionLocation);
+    //draw something
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    eglSwapBuffers(eglDisplay, eglSurface);
+    return nullptr;
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_huahuico_mynatiaveapplication_Native_00024Companion_releaseOffscreen(JNIEnv *env,
+                                                                              jobject thiz) {
+    eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglDestroyContext(eglDisplay, eglCtx);
+    eglDestroySurface(eglDisplay, eglSurface);
+    eglTerminate(eglDisplay);
+    eglDisplay = EGL_NO_DISPLAY;
+    eglSurface = EGL_NO_SURFACE;
+    eglCtx = EGL_NO_CONTEXT;
 }

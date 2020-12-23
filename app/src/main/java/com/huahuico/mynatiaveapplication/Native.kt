@@ -11,6 +11,8 @@ class Native {
         init {
             System.loadLibrary("native-lib")
         }
+        public external fun offscreenRendering(width: Int, height: Int) : IntArray?
+        public external fun releaseOffscreen()
         private external fun convertToGray(bitmap: IntArray?, width: Int, height: Int) : IntArray?
         private external fun convertToErode(bitmap: IntArray?, width: Int, height: Int) : IntArray?
         private external fun convertToBlur(bitmap: IntArray?, width: Int, height: Int) : IntArray?
