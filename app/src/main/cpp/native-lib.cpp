@@ -394,125 +394,46 @@ static EGLContext eglCtx;
 static EGLDisplay eglDisplay;
 static GLuint m_TextureId;
 static GLint m_ProgramObj;
+const char vShaderStr [] =
+        "#version 300 es                                    \n"
+        "layout(location = 0) in vec4 a_position;           \n"
+        "layout(location = 1) in vec2 a_texCoord;           \n"
+        "out vec2 v_texCoord;                               \n"
+        "void main() {                                      \n"
+        "   gl_Position = a_position;                       \n"
+        "   v_texCoord = a_texCoord;                        \n"
+        "}                                                  \n";
+//normal fragment shader
+const char fShaderStr [] =
+        "#version 300 es                                                                                \n"
+"precision mediump float;                                                                               \n"
+        "in vec2 v_texCoord;                                                                            \n"
+        "layout(location = 0) out vec4 outColor;                                                        \n"
+        "uniform sampler2D s_TextureMap;                                                                \n"
+        "uniform lowp float contrast;                                                                   \n"
+        "void main() {                                                                                  \n"
+        "   lowp vec4 textureColor = texture(s_TextureMap, v_texCoord);                                 \n"
+        "   outColor = vec4(((textureColor.rgb - vec3(0.5)) * contrast + vec3(0.5)), textureColor.w);   \n"
+        "}                                                                                              \n";
+
+const GLfloat verticesCoords[] = {
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f
+};
+const GLfloat textureCoords[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 1.0f
+};
+GLint m_SampleLoc;
+GLuint m_VertexShader;
+GLuint m_FragmentSahder;
+GLint m_ContrastLoc;
+GLfloat m_ContrastValue = 1.0f;
 extern "C"
-JNIEXPORT jintArray JNICALL
-Java_com_huahuico_mynatiaveapplication_Native_00024Companion_offscreenRendering(JNIEnv *env,
-                                                                                jobject thiz,
-                                                                                jint width,
-                                                                                jint height) {
-    std::cout.rdbuf(&g_MyStreamBuf);
-    const char vertex_shader_fix[] =
-            "attribute vec4 a_Position;\n"
-            "void main() {\n"
-            "	gl_Position=a_Position;\n"
-            "}\n";
-
-    const char fragment_shader_simple[] =
-            "precision mediump float;\n"
-            "void main(){\n"
-            "	gl_FragColor = vec4(0.0,1.0,0.0,1.0);\n"
-            "}\n";
-
-    const float tableVerticesWithTriangles[] = {
-            // Triangle1
-            -0.5f, -0.5f,
-            0.5f, 0.5f,
-            -0.5f, 0.5f,
-            // Triangle2
-            -0.5f, -0.5f,
-            0.5f, -0.5f,
-            0.5f, 0.5f,
-    };
-    const EGLint confAttr[] = {
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,//very important!
-            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-            EGL_RED_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_BLUE_SIZE, 8,
-            EGL_ALPHA_SIZE, 8,//if you need the alpha channel
-            EGL_DEPTH_SIZE, 8,//if you need the depth buffer
-            EGL_STENCIL_SIZE, 8,
-            EGL_NONE
-    };
-    const EGLint ctxAttr[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,//very important!
-            EGL_NONE
-    };
-    const EGLint surfaceAttr[] = {
-            EGL_WIDTH, 512,
-            EGL_WIDTH, 512,
-            EGL_NONE
-    };
-    EGLint eglMajVers, eglMinVers;
-    EGLint numConfigs;
-    eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if (eglDisplay == EGL_NO_DISPLAY) {
-        cout << "Unable to open connection to local windowing system" << endl;
-    }
-    if (!eglInitialize(eglDisplay, &eglMajVers, &eglMinVers)) {
-        cout << "Unable to initialize EGL, Handle and recover" << endl;
-    }
-    cout << "EGL init with version " << eglMajVers << "." << eglMinVers << endl;
-    if (!eglChooseConfig(eglDisplay, confAttr, &eglConf, 1, &numConfigs)) {
-        cout << "Some configs are wrong" << endl;
-    }
-    eglSurface = eglCreatePbufferSurface(eglDisplay, eglConf, surfaceAttr);
-    if (eglSurface == EGL_NO_SURFACE) {
-        switch (eglGetError()) {
-            case EGL_BAD_ALLOC:
-                cout << "Not enough resources available" << endl;
-                break;
-            case EGL_BAD_CONFIG:
-                cout << "provided EGLConfig is invalid" << endl;
-                break;
-            case EGL_BAD_PARAMETER:
-                cout << "Provided EGL_WIDTH, EGL_HEIGHT is invalid" << endl;
-                break;
-            case EGL_BAD_MATCH:
-                cout << "Check window and EGLConfig attributes" << endl;
-                break;
-        }
-    }
-    eglCtx = eglCreateContext(eglDisplay, eglConf, EGL_NO_CONTEXT, ctxAttr);
-    if (eglCtx == EGL_NO_CONTEXT) {
-        EGLint error = eglGetError();
-        if (error == EGL_BAD_CONFIG) {
-            cout << "EGL_BAD_CONFIG" << endl;
-        }
-    }
-    if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglCtx)) {
-        cout << "Make current failed" << endl;
-    }
-
-    const char *vertex_shader = vertex_shader_fix;
-    const char *fragment_shader = fragment_shader_simple;
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glCullFace(GL_BACK);
-    glViewport(0,0, 512, 512);
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertex_shader, NULL);
-    glCompileShader(vertexShader);
-
-    GLuint fragmentShader =glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragment_shader, NULL);
-    glCompileShader(fragmentShader);
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-    glUseProgram(program);
-    GLuint aPositionLocation = glGetAttribLocation(program, "a_Position");
-    glVertexAttribPointer(aPositionLocation,2,GL_FLOAT, GL_FALSE, 0, tableVerticesWithTriangles);
-    glEnableVertexAttribArray(aPositionLocation);
-    //draw something
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    eglSwapBuffers(eglDisplay, eglSurface);
-    return nullptr;
-}extern "C"
 JNIEXPORT void JNICALL
 Java_com_huahuico_mynatiaveapplication_Native_00024Companion_releaseOffscreen(JNIEnv *env,
                                                                               jobject thiz) {
@@ -700,10 +621,7 @@ void createRenderBuffer(int width, int height) {
     }
 }
 
-void createTextureBuffer(int width, int height, void * pixels) {
-    GLint m_SampleLoc;
-    GLuint m_VertexShader;
-    GLuint m_FragmentSahder;
+void createTextureBuffer(int width, int height) {
     glGenTextures(1, &m_TextureId);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -712,48 +630,16 @@ void createTextureBuffer(int width, int height, void * pixels) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
-    char vShaderStr [] =
-            "#version 300 es                                    \n"
-            "layout(location = 0) in vec4 a_position;           \n"
-            "layout(location = 1) in vec2 a_texCoord;           \n"
-            "out vec2 v_texCoord;                               \n"
-            "void main() {                                      \n"
-            "   gl_Position = a_position;                       \n"
-            "   v_texCoord = a_texCoord;                        \n"
-            "}                                                  \n";
-    //normal fragment shader
-    char fShaderStr [] =
-            "#version 300 es                                    \n"
-            "precision mediump float;                           \n"
-            "in vec2 v_texCoord;                                \n"
-            "layout(location = 0) out vec4 outColor;            \n"
-            "uniform sampler2D s_TextureMap;                    \n"
-            "void main() {                                      \n"
-            "   outColor = texture(s_TextureMap, v_texCoord);   \n"
-            "}                                                  \n";
     m_ProgramObj = createProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentSahder);
     if (m_ProgramObj) {
         m_SampleLoc = glGetUniformLocation(m_ProgramObj, "s_TextureMap");
+        m_ContrastLoc = glGetUniformLocation(m_ProgramObj, "contrast");
     } else {
         cout << "TextureMapSampler::Init create program fail" << endl;
     }
-
+}
+void drawTextureBuffer(int width, int height, void * pixels) {
     if (m_ProgramObj == GL_NONE || m_TextureId == GL_NONE) return;
-    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(1.0, 0.0, 0.0, 1.0);
-    GLfloat verticesCoords[] = {
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            -1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f
-    };
-    GLfloat textureCoords[] = {
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            0.0f, 1.0f,
-            1.0f, 1.0f
-    };
-    GLushort indices [] = {0, 1, 2, 1, 3, 2};
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
@@ -769,34 +655,44 @@ void createTextureBuffer(int width, int height, void * pixels) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
     glUniform1i(m_SampleLoc, 0);
+    glUniform1f(m_ContrastLoc, m_ContrastValue);
     GO_CHECK_GL_ERROR();
+    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1.0, 0.0, 0.0, 1.0);
+    GLushort indices [] = {0, 1, 2, 1, 3, 2};
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
     GO_CHECK_GL_ERROR();
-}
-extern "C" JNIEXPORT jint JNICALL
-Java_com_huahuico_mynatiaveapplication_Native_00024Companion_openglOffscreen(JNIEnv *env,
-                                                                             jobject thiz,
-                                                                             jobject bitmap) {
-    std::cout.rdbuf(&g_MyStreamBuf);
-    void * srcpixels = 0;
-    AndroidBitmapInfo info;
-    if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) return -1;
-    if (AndroidBitmap_lockPixels(env, bitmap, &srcpixels) < 0) return -1;
-
-    initEGLEnv(info.width, info.height);
-    createRenderBuffer(info.width, info.height);
-    createTextureBuffer(info.width, info.height, srcpixels);
 
     // check the output format
     // This is critical to knowing what surface format just got created
     // ES only supports 5-6-5 and other limited formats and the driver
     // might have picked another format
-    GLint format = 0, type = 0;
-    glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &format);
-    glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &type);
+//    GLint format = 0, type = 0;
+//    glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &format);
+//    glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &type);
     // commit the clear to the offscreen surface
     eglSwapBuffers(eglDisplay, eglSurface);
-
-    AndroidBitmap_unlockPixels(env, bitmap);
+}
+extern "C" JNIEXPORT jint JNICALL
+Java_com_huahuico_mynatiaveapplication_Native_00024Companion_openglOffscreen(JNIEnv *env,
+                                                                             jobject thiz,
+                                                                             jint width, jint height) {
+    std::cout.rdbuf(&g_MyStreamBuf);
+    initEGLEnv(width, height);
+    createRenderBuffer(width, height);
+    createTextureBuffer(width, height);
     return 0;
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_huahuico_mynatiaveapplication_Native_00024Companion_contrastFilter(JNIEnv *env,
+                                                                            jobject thiz,
+                                                                            jobject bitmap,
+                                                                            jfloat contrast) {
+    m_ContrastValue = (GLfloat) contrast;
+    void * srcpixels = 0;
+    AndroidBitmapInfo info;
+    if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) return;
+    if (AndroidBitmap_lockPixels(env, bitmap, &srcpixels) < 0) return;
+    drawTextureBuffer(info.width, info.height, srcpixels);
+    AndroidBitmap_unlockPixels(env, bitmap);
 }
