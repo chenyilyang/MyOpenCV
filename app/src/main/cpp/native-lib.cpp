@@ -687,12 +687,17 @@ JNIEXPORT void JNICALL
 Java_com_huahuico_mynatiaveapplication_Native_00024Companion_contrastFilter(JNIEnv *env,
                                                                             jobject thiz,
                                                                             jobject bitmap,
+                                                                            jobject dstBitmap,
                                                                             jfloat contrast) {
     m_ContrastValue = (GLfloat) contrast;
     void * srcpixels = 0;
+    void * dstpixels = 0;
     AndroidBitmapInfo info;
     if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) return;
     if (AndroidBitmap_lockPixels(env, bitmap, &srcpixels) < 0) return;
+    if (AndroidBitmap_lockPixels(env, dstBitmap, &dstpixels) < 0) return;
     drawTextureBuffer(info.width, info.height, srcpixels);
+    glReadPixels(0, 0, info.width, info.height, GL_RGBA, GL_UNSIGNED_BYTE, dstpixels);
     AndroidBitmap_unlockPixels(env, bitmap);
+    AndroidBitmap_unlockPixels(env, dstBitmap);
 }

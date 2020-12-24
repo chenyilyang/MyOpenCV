@@ -11,7 +11,7 @@ class Native {
         init {
             System.loadLibrary("native-lib")
         }
-        external fun contrastFilter(bitmap : Bitmap, contrast: Float)
+        external fun contrastFilter(bitmap : Bitmap, dstBitmap : Bitmap, contrast: Float)
         external fun releaseOffscreen()
         external fun openglOffscreen(width : Int, height : Int) : Int
         private external fun convertToGray(bitmap: IntArray?, width: Int, height: Int) : IntArray?

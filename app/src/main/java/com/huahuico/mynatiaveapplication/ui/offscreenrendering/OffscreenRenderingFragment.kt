@@ -46,7 +46,6 @@ class OffscreenRenderingFragment : BaseFragment() {
     override fun doSomething(bitmaps: Array<Bitmap>) : Array<Bitmap> {
         return Array<Bitmap>(bitmaps.size) {
             bitmaps[it]
-//            Native.laplacian(bitmaps[it])
         }
     }
     fun convertABGRtoARGB(pixels: IntArray) {
@@ -65,7 +64,6 @@ class OffscreenRenderingFragment : BaseFragment() {
         }
     }
     override fun renderingDstImages(bitmaps: Array<Bitmap>) {
-//        Native.offscreenRendering(512, 512)
         bitmap = bitmaps[0]
         bitmap?.let {
             width = it.width
@@ -74,28 +72,10 @@ class OffscreenRenderingFragment : BaseFragment() {
             RGBABuffer = IntBuffer.allocate(width * height)
             changeContrast(bitmaps[0], 1.0f)
         }
-//        startActivity(Intent(requireActivity(), FrameBufferObjectActivity::class.java))
     }
     private fun changeContrast(bitmap : Bitmap, contrast : Float) {
-        Native.contrastFilter(bitmap, contrast)
-        RGBABuffer.position(0)
-        GLES30.glReadPixels(
-                0,
-                0,
-                width,
-                height,
-                GLES30.GL_RGBA,
-                GLES30.GL_UNSIGNED_BYTE,
-                RGBABuffer
-        )
-        val modelData = RGBABuffer.array()
-        convertABGRtoARGB(modelData)
-        val modelBitmap = Bitmap.createBitmap(
-                modelData,
-                width,
-                height,
-                Bitmap.Config.ARGB_8888
-        )
+        val modelBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        Native.contrastFilter(bitmap, modelBitmap, contrast)
         dstImage.setImageBitmap(modelBitmap)
     }
 
