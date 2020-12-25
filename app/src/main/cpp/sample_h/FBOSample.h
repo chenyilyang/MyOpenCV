@@ -6,7 +6,6 @@
 #define MYNATIAVEAPPLICATION_FBOSAMPLE_H
 
 #include "SampleBase.h"
-#include "ImageDef.h"
 class FBOSample : public SampleBase {
 public:
     FBOSample();

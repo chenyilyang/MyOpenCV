@@ -33,6 +33,11 @@
         android:label="@string/menu_mat"
         tools:layout="@layout/fragment_src_dst" />
     <fragment
+        android:id="@+id/nav_triangle"
+        android:name="com.huahuico.mynatiaveapplication.opengl.ui.TriangleFragment"
+        android:label="@string/menu_triangle"
+        tools:layout="@layout/fragment_image" />
+    <fragment
         android:id="@+id/nav_contrast"
         android:name="com.huahuico.mynatiaveapplication.ui.contrast.ContrastFragment"
         android:label="@string/menu_contrast"

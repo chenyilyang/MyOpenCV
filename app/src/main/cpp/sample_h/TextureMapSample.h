@@ -6,7 +6,6 @@
 #define MYNATIAVEAPPLICATION_TEXTUREMAPSAMPLE_H
 
 #include "SampleBase.h"
-#include "ImageDef.h"
 class TextureMapSample : public SampleBase{
 public:
     TextureMapSample();

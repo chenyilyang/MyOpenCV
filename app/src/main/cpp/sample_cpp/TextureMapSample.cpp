@@ -5,6 +5,7 @@
 #include "../sample_h/TextureMapSample.h"
 #include "../include/GLUtils.h"
 #include "../include/LogUtil.h"
+#include <iostream>
 TextureMapSample::TextureMapSample() {
     m_TextureId = GL_NONE;
 }
@@ -52,11 +53,13 @@ void TextureMapSample::Draw(int screenW, int screenH) {
     if (m_ProgramObj == GL_NONE || m_TextureId == GL_NONE) return;
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 0.0, 0.0, 1.0);
+    float ratio = ((float)screenW) / m_RenderImage.width;
+    float ratioH = ratio * m_RenderImage.height / screenH;
     GLfloat verticesCoords[] = {
-            -1.0f, 0.5f, 0.0f,
-            -1.0f, -0.5f, 0.0f,
-            1.0f, -0.5f, 0.0f,
-            1.0f, 0.5f, 0.0f
+            -1.0f, ratioH, 0.0f,
+            -1.0f, -ratioH, 0.0f,
+            1.0f, -ratioH, 0.0f,
+            1.0f, ratioH, 0.0f
     };
     GLfloat textureCoords[] = {
             0.0f, 0.0f,

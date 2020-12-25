@@ -19,6 +19,9 @@ void GLRenderContext::SetParamsInt(int paramType, int value0, int value1) {
     if (paramType == SAMPLE_SHADER_TYPE_NORMAL) {
         switch (value0) {
             //todo add sample shader type filter here
+            case SAMPLE_SHADER_TYPE_TRIANGLE:
+                m_pCurrSample = new TriangleSample();
+                break;
             case SAMPLE_SHADER_TYPE_FBO:
                 m_pCurrSample = new FBOSample();
                 break;

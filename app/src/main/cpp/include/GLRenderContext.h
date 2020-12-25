@@ -11,6 +11,8 @@
 #include "SampleBase.h"
 #include "../sample_h/FBOSample.h"
 #include "../sample_h/TextureMapSample.h"
+#include "../sample_h/TriangleSample.h"
+
 
 
 class GLRenderContext {

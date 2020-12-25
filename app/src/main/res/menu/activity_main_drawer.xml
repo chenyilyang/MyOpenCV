@@ -25,6 +25,10 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_mat" />
         <item
+            android:id="@+id/nav_triangle"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_triangle" />
+        <item
             android:id="@+id/nav_contrast"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_contrast" />
