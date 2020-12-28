@@ -12,6 +12,7 @@
 #include "../sample_h/FBOSample.h"
 #include "../sample_h/TextureMapSample.h"
 #include "../sample_h/TriangleSample.h"
+#include "../sample_h/YUVTextureSample.h"
 
 
 

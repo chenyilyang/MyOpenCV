@@ -44,5 +44,9 @@
             android:id="@+id/nav_opengl_offscreen_rendering"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_opengl_offscreen_rendering" />
+        <item
+            android:id="@+id/nav_opengl_yuv_rendering"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_opengl_yuv_rendering" />
     </group>
 </menu>

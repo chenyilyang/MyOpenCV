@@ -28,6 +28,9 @@ void GLRenderContext::SetParamsInt(int paramType, int value0, int value1) {
             case SAMPLE_SHADER_TYPE_TEXTUREMAP:
                 m_pCurrSample = new TextureMapSample();
                 break;
+            case SAMPLE_SHADER_TYPE_YUVTEXTURE:
+                m_pCurrSample = new YUVTextureSample();
+                break;
         }
     }
     if (m_pCurrSample != nullptr) LOGCATD("GLRenderContext::SetParamsInt paramType = %d, value0 = %d, value1 = %d", paramType, value0, value1);
