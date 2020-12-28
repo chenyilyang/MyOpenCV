@@ -34,7 +34,7 @@ void YUVTextureSample::Init() {
             "   vec3 yuv;                                                                           \n"
             "   yuv.x = texture(y_texture, v_texCoord).r;                                           \n"
             "   yuv.y = texture(uv_texture, v_texCoord).a - 0.5;                                    \n"
-            "   yuv.z = texture(uv_texture, v_texCoord).r - 0.4;                                    \n"
+            "   yuv.z = texture(uv_texture, v_texCoord).r - 0.5;                                    \n"
             "   highp vec3 rgb = mat3(1, 1, 1, 0, -0.344, 1.770, 1.403, -0.714, 0) * yuv;           \n"
             "   outColor = vec4(rgb, 1);                                                            \n"
             "}                                                                                      \n";
