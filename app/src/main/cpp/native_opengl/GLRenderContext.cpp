@@ -3,6 +3,11 @@
 //
 
 #include "../include/GLRenderContext.h"
+#include "../sample_h/FBOSample.h"
+#include "../sample_h/TextureMapSample.h"
+#include "../sample_h/TriangleSample.h"
+#include "../sample_h/YUVTextureSample.h"
+#include "../sample_h/VAOVBOSample.h"
 
 GLRenderContext * GLRenderContext::m_pContext = nullptr;
 GLRenderContext::GLRenderContext() {
@@ -30,6 +35,9 @@ void GLRenderContext::SetParamsInt(int paramType, int value0, int value1) {
                 break;
             case SAMPLE_SHADER_TYPE_YUVTEXTURE:
                 m_pCurrSample = new YUVTextureSample();
+                break;
+            case SAMPLE_SHADER_TYPE_VAOVBO:
+                m_pCurrSample = new VAOVBOSample();
                 break;
         }
     }
@@ -104,7 +112,7 @@ void GLRenderContext::SetImageData(int format, int width, int height, uint8_t *p
 }
 void GLRenderContext::OnSurfaceCreated() {
     LOGCATD("GLRenderContext::OnSurfaceCreated");
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
 void GLRenderContext::OnSurfaceChanged(int width, int height) {
     LOGCATD("GLRenderContext::OnSurfaceChanged [w,h] = [%d,%d]", width, height);
