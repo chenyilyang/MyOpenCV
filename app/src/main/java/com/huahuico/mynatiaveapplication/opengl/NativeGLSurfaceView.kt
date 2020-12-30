@@ -51,12 +51,18 @@ class NativeGLSurfaceView : GLSurfaceView, ScaleGestureDetector.OnScaleGestureLi
                         MotionEvent.ACTION_MOVE -> {
                             val dy = y - previousY
                             val dx = x - previousX
-                            angleY = (dy * TOUCH_SCALE_FACTOR).toInt()
-                            angleX = (dx * TOUCH_SCALE_FACTOR).toInt()
+                            angleY += (dx * TOUCH_SCALE_FACTOR).toInt()
+                            angleX += (dy * TOUCH_SCALE_FACTOR).toInt()
                         }
                     }
                     previousX = x
                     previousY = y
+                    when(glRender.sampleType) {
+                        SampleSahderType.SAMPLE_SHADER_TYPE_COORD_SYSTEM -> {
+                            glRender.updateTransformMatrix(angleX * 1.0f, angleY * 1.0f, curScale, curScale)
+                            requestRender()
+                        }
+                    }
                 }
                 it
             } else {
@@ -93,6 +99,22 @@ class NativeGLSurfaceView : GLSurfaceView, ScaleGestureDetector.OnScaleGestureLi
 
     override fun onScale(detector: ScaleGestureDetector?): Boolean {
         //do scale
+        detector?.let {
+            when(glRender.sampleType) {
+                SampleSahderType.SAMPLE_SHADER_TYPE_COORD_SYSTEM -> {
+                    val preSpan = it.previousSpan
+                    val curSpan = it.currentSpan
+                    curScale = if (curSpan < preSpan) {
+                        preScale - (preSpan - curSpan) / 200
+                    } else {
+                        preScale + (curSpan - preSpan) / 200
+                    }
+                    curScale = 0.05f.coerceAtLeast(curScale.coerceAtMost(80.0f))
+                    glRender.updateTransformMatrix(angleX * 1.0f, angleY * 1.0f, curScale, curScale);
+                    requestRender()
+                }
+            }
+        }
         return false
     }
 
@@ -137,7 +159,7 @@ class NativeGLSurfaceView : GLSurfaceView, ScaleGestureDetector.OnScaleGestureLi
         var touchX = -1F
         var touchY = -1F
         when(event.action) {
-            MotionEvent.ACTION_MOVE ->{
+            MotionEvent.ACTION_UP ->{
                 touchX = event.x
                 touchY = event.y
                 //click

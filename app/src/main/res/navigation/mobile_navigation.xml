@@ -72,4 +72,9 @@
         android:name="com.huahuico.mynatiaveapplication.opengl.ui.TransformFeedBackFragment"
         android:label="@string/menu_opengl_transform_feedback"
         tools:layout="@layout/fragment_image" />
+    <fragment
+        android:id="@+id/nav_opengl_coord_system"
+        android:name="com.huahuico.mynatiaveapplication.opengl.ui.CoordSystemFragment"
+        android:label="@string/menu_opengl_coord_system"
+        tools:layout="@layout/fragment_image" />
 </navigation>

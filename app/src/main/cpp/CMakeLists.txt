@@ -20,7 +20,7 @@ file(GLOB src-files
 #        ${MAIN_SOURCE_DIR}/cpp/sample_cpp/TriangleSample.cpp
 #        ${MAIN_SOURCE_DIR}/cpp/sample_cpp/TextureMapSample.cpp
 #        ${MAIN_SOURCE_DIR}/cpp/sample_cpp/FBOSample.cpp)
-        ${MAIN_SOURCE_DIR}/cpp/sample_cpp/*.cpp)
+        ${MAIN_SOURCE_DIR}/cpp/sample_cpp/**.cpp)
 
 #add_library(opencv_jni_shared STATIC dummy.cpp)
 add_library( # Sets the name of the library.
