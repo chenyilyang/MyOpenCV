@@ -24,4 +24,5 @@
     <string name="menu_triangle">Triangle</string>
     <string name="menu_opengl_yuv_rendering">YUV Rendering</string>
     <string name="menu_opengl_vao_vbo"><![CDATA[VAO&VBO]]></string>
+    <string name="menu_opengl_transform_feedback">Transform Feedback</string>
 </resources>

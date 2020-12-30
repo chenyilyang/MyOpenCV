@@ -37,7 +37,7 @@ public:
 private:
     static GLRenderContext * m_pContext;
     SampleBase * m_pCurrSample;
-    int m_ScreenW, m_ScreenH;
+    int m_ScreenW = 0, m_ScreenH = 0;
 };
 
 

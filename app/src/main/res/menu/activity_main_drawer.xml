@@ -52,5 +52,9 @@
             android:id="@+id/nav_opengl_vao_vbo"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_opengl_vao_vbo" />
+        <item
+            android:id="@+id/nav_opengl_transform_feedback"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_opengl_transform_feedback" />
     </group>
 </menu>

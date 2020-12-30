@@ -8,6 +8,7 @@
 #include "../sample_h/TriangleSample.h"
 #include "../sample_h/YUVTextureSample.h"
 #include "../sample_h/VAOVBOSample.h"
+#include "../sample_h/TransformFeedbackSample.h"
 
 GLRenderContext * GLRenderContext::m_pContext = nullptr;
 GLRenderContext::GLRenderContext() {
@@ -38,6 +39,9 @@ void GLRenderContext::SetParamsInt(int paramType, int value0, int value1) {
                 break;
             case SAMPLE_SHADER_TYPE_VAOVBO:
                 m_pCurrSample = new VAOVBOSample();
+                break;
+            case SAMPLE_SHADER_TYPE_TRANSFORM_FEEDBACK:
+                m_pCurrSample = new TransformFeedbackSample();
                 break;
         }
     }
