@@ -1,7 +1,6 @@
 package com.huahuico.mynatiaveapplication.ui.offscreenrendering
 
 import android.graphics.Bitmap
-import android.opengl.GLES30
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,8 +8,7 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import com.huahuico.mynatiaveapplication.BaseFragment
 import com.huahuico.mynatiaveapplication.Native
-import com.huahuico.mynatiaveapplication.R
-import kotlinx.android.synthetic.main.fragment_src_dst.*
+import com.huahuico.mynatiaveapplication.databinding.FragmentSrcDstBinding
 import java.nio.IntBuffer
 
 class OffscreenRenderingFragment : BaseFragment() {
@@ -23,11 +21,14 @@ class OffscreenRenderingFragment : BaseFragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_src_dst, container, false)
+    ): View? {
+        _bindingSrcDst = FragmentSrcDstBinding.inflate(inflater, container, false)
+        return _bindingSrcDst?.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        _bindingSrcDst?.seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             }
 
@@ -76,11 +77,11 @@ class OffscreenRenderingFragment : BaseFragment() {
     private fun changeContrast(bitmap : Bitmap, contrast : Float) {
         val modelBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         Native.contrastFilter(bitmap, modelBitmap, contrast)
-        dstImage.setImageBitmap(modelBitmap)
+        _bindingSrcDst?.dstImage?.setImageBitmap(modelBitmap)
     }
 
     override fun renderingSrcImages(bitmaps: Array<Bitmap>) {
-        srcImage.setImageBitmap(bitmaps[0])
+        _bindingSrcDst?.srcImage?.setImageBitmap(bitmaps[0])
     }
 
     override fun getAssetsImageNames(): Array<String> {

@@ -8,14 +8,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModelProviders
 import com.huahuico.mynatiaveapplication.BaseCameraFragment
 import com.huahuico.mynatiaveapplication.Native
-import com.huahuico.mynatiaveapplication.R
+import com.huahuico.mynatiaveapplication.databinding.CamShiftFragmentBinding
 import com.huahuico.mynatiaveapplication.util.*
-import kotlinx.android.synthetic.main.cam_shift_fragment.*
 import java.util.concurrent.ExecutorService
 
 class CamShiftFragment : BaseCameraFragment() {
@@ -28,7 +31,8 @@ class CamShiftFragment : BaseCameraFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.cam_shift_fragment, container, false)
+        _binding = CamShiftFragmentBinding.inflate(inflater, container, false)
+        return _binding?.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -37,8 +41,8 @@ class CamShiftFragment : BaseCameraFragment() {
         mHandler = Handler(Looper.getMainLooper()) {
             if (it.what == 100) {
                 val bitmap = it.data["bitmap"] as Bitmap?
-                if (bitmap != null && analysisImageView != null) {
-                    analysisImageView.setImageBitmap(bitmap)
+                if (bitmap != null && _binding != null) {
+                    _binding?.analysisImageView?.setImageBitmap(bitmap)
                 } else {
                     mHandler.removeMessages(100)
                 }
@@ -95,6 +99,22 @@ class CamShiftFragment : BaseCameraFragment() {
             })
             }
     }
+
+//    override fun <I : Any?, O : Any?> prepareCall(
+//        contract: ActivityResultContract<I, O>,
+//        callback: ActivityResultCallback<O>
+//    ): ActivityResultLauncher<I> {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun <I : Any?, O : Any?> prepareCall(
+//        contract: ActivityResultContract<I, O>,
+//        registry: ActivityResultRegistry,
+//        callback: ActivityResultCallback<O>
+//    ): ActivityResultLauncher<I> {
+//        TODO("Not yet implemented")
+//    }
+
     var buf : ByteArray? = null
     private fun convertToBitmap(data: ByteArray, w: Int, h: Int, rotation : Int) : Bitmap {
         var time = System.currentTimeMillis()

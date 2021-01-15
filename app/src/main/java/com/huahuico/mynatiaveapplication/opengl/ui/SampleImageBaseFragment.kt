@@ -7,11 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import com.huahuico.mynatiaveapplication.BaseFragment
-import com.huahuico.mynatiaveapplication.R
+import com.huahuico.mynatiaveapplication.databinding.FragmentImageBinding
 import com.huahuico.mynatiaveapplication.opengl.NativeGLRender
 import com.huahuico.mynatiaveapplication.opengl.NativeGLSurfaceView
 import com.huahuico.mynatiaveapplication.opengl.NativeGLSurfaceView.Companion.IMAGE_FORMAT_RGBA
-import kotlinx.android.synthetic.main.fragment_image.*
 import java.nio.ByteBuffer
 
 abstract class SampleImageBaseFragment : BaseFragment() {
@@ -21,7 +20,10 @@ abstract class SampleImageBaseFragment : BaseFragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_image, container, false)
+    ): View? {
+        _bindingImage = FragmentImageBinding.inflate(inflater, container, false)
+        return _bindingImage?.root
+    }
 
     override fun doSomething(bitmaps: Array<Bitmap>) : Array<Bitmap> {
         return Array<Bitmap>(bitmaps.size) {
@@ -38,10 +40,12 @@ abstract class SampleImageBaseFragment : BaseFragment() {
         )
         lp.addRule(RelativeLayout.CENTER_IN_PARENT)
         nativeGLSurfaceView = NativeGLSurfaceView(context, glRender)
-        rootView.addView(nativeGLSurfaceView, lp)
-        nativeGLSurfaceView.renderMode = RENDERMODE_WHEN_DIRTY
-        if (rootView.width != nativeGLSurfaceView.width || rootView.height != nativeGLSurfaceView.height) {
-            nativeGLSurfaceView.setAspectRatio(rootView.width, rootView.height)
+        _bindingImage?.let {
+            it.rootView.addView(nativeGLSurfaceView, lp)
+            nativeGLSurfaceView.renderMode = RENDERMODE_WHEN_DIRTY
+            if (it.rootView.width != nativeGLSurfaceView.width || it.rootView.height != nativeGLSurfaceView.height) {
+                nativeGLSurfaceView.setAspectRatio(it.rootView.width, it.rootView.height)
+            }
         }
     }
 

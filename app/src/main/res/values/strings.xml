@@ -26,4 +26,5 @@
     <string name="menu_opengl_vao_vbo"><![CDATA[VAO&VBO]]></string>
     <string name="menu_opengl_transform_feedback">Transform Feedback</string>
     <string name="menu_opengl_coord_system">Coord System</string>
+    <string name="menu_jetpack_compose">JetpackCompse</string>
 </resources>

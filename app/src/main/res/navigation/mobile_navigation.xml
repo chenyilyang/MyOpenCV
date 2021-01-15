@@ -77,4 +77,9 @@
         android:name="com.huahuico.mynatiaveapplication.opengl.ui.CoordSystemFragment"
         android:label="@string/menu_opengl_coord_system"
         tools:layout="@layout/fragment_image" />
+    <fragment
+        android:id="@+id/nav_jetpack_compose"
+        android:name="com.huahuico.mynatiaveapplication.compose.ComposeFragment"
+        android:label="@string/menu_jetpack_compose"
+        tools:layout="@layout/compose_fragment" />
 </navigation>

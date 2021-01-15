@@ -7,8 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.huahuico.mynatiaveapplication.BaseFragment
 import com.huahuico.mynatiaveapplication.Native
-import com.huahuico.mynatiaveapplication.R
-import kotlinx.android.synthetic.main.fragment_src_dst.*
+import com.huahuico.mynatiaveapplication.databinding.FragmentSrcDstBinding
 
 class BlurFragment : BaseFragment() {
 
@@ -16,7 +15,10 @@ class BlurFragment : BaseFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_src_dst, container, false)
+    ): View? {
+        _bindingSrcDst = FragmentSrcDstBinding.inflate(inflater, container, false)
+        return _bindingSrcDst?.root
+    }
 
     override fun doSomething(bitmaps: Array<Bitmap>) : Array<Bitmap> {
         return Array<Bitmap>(bitmaps.size) {
@@ -26,12 +28,12 @@ class BlurFragment : BaseFragment() {
     }
 
     override fun renderingDstImages(bitmaps: Array<Bitmap>) {
-        dstImage.setImageBitmap(bitmaps[0])
+        _bindingSrcDst?.dstImage?.setImageBitmap(bitmaps[0])
 //        saveBitmapToAlbum(requireContext(), bitmaps[0])
     }
 
     override fun renderingSrcImages(bitmaps: Array<Bitmap>) {
-        srcImage.setImageBitmap(bitmaps[0])
+        _bindingSrcDst?.srcImage?.setImageBitmap(bitmaps[0])
     }
 
     override fun getAssetsImageNames(): Array<String> {

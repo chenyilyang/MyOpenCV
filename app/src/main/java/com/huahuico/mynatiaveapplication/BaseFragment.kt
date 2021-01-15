@@ -7,6 +7,12 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
+import com.huahuico.mynatiaveapplication.databinding.FragmentImageBinding
+import com.huahuico.mynatiaveapplication.databinding.FragmentSrcDstBinding
 import com.huahuico.mynatiaveapplication.rxpermissions.RxPermissionsFragment
 import com.huahuico.mynatiaveapplication.util.Rx3Common
 import io.reactivex.rxjava3.core.Observable
@@ -15,7 +21,8 @@ import io.reactivex.rxjava3.core.ObservableOnSubscribe
 import kotlinx.coroutines.*
 
 abstract class BaseFragment : RxPermissionsFragment(), CoroutineScope by MainScope() {
-
+    protected var _bindingSrcDst : FragmentSrcDstBinding? = null
+    protected var _bindingImage : FragmentImageBinding? = null
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initialize()
@@ -84,5 +91,26 @@ abstract class BaseFragment : RxPermissionsFragment(), CoroutineScope by MainSco
             e.printStackTrace()
             return false
         }
+    }
+
+//    override fun <I : Any?, O : Any?> prepareCall(
+//        contract: ActivityResultContract<I, O>,
+//        callback: ActivityResultCallback<O>
+//    ): ActivityResultLauncher<I> {
+//        return registerForActivityResult(contract, callback)
+//    }
+//
+//    override fun <I : Any?, O : Any?> prepareCall(
+//        contract: ActivityResultContract<I, O>,
+//        registry: ActivityResultRegistry,
+//        callback: ActivityResultCallback<O>
+//    ): ActivityResultLauncher<I> {
+//        return registry.register("requestCode_0110", viewLifecycleOwner, contract, callback)
+//    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _bindingImage = null
+        _bindingSrcDst = null
     }
 }

@@ -1,16 +1,13 @@
 package com.huahuico.mynatiaveapplication.ui.mat
 
 import android.graphics.Bitmap
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.huahuico.mynatiaveapplication.BaseFragment
 import com.huahuico.mynatiaveapplication.Native
-import com.huahuico.mynatiaveapplication.R
-import kotlinx.android.synthetic.main.fragment_src_dst.*
+import com.huahuico.mynatiaveapplication.databinding.FragmentSrcDstBinding
 
 class MatFragment : BaseFragment() {
 
@@ -18,7 +15,8 @@ class MatFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_src_dst, container, false)
+        _bindingSrcDst = FragmentSrcDstBinding.inflate(inflater, container, false)
+        return _bindingSrcDst?.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -32,11 +30,11 @@ class MatFragment : BaseFragment() {
     }
 
     override fun renderingDstImages(bitmaps: Array<Bitmap>) {
-        dstImage.setImageBitmap(bitmaps[0])
+        _bindingSrcDst?.dstImage?.setImageBitmap(bitmaps[0])
     }
 
     override fun renderingSrcImages(bitmaps: Array<Bitmap>) {
-        srcImage.setImageBitmap(bitmaps[0])
+        _bindingSrcDst?.srcImage?.setImageBitmap(bitmaps[0])
     }
 
     override fun getAssetsImageNames(): Array<String> {

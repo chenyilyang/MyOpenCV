@@ -60,5 +60,9 @@
             android:id="@+id/nav_opengl_coord_system"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_opengl_coord_system" />
+        <item
+            android:id="@+id/nav_jetpack_compose"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_jetpack_compose" />
     </group>
 </menu>
